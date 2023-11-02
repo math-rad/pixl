@@ -17,7 +17,7 @@
         const ctx = canvas.getContext('2d');
 
         const img = new Image();
-        img.src = 'Untitled.png';
+        img.src = 'player.png';
 
         // Adjust the canvas size and scale
         const scale = 100 / 16;
@@ -29,7 +29,7 @@
 
         function updateCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, x * scale, y * scale, 100 * scale, 100 * scale);
+            ctx.drawImage(img, x * scale * 8, y * scale * 8, 100 * scale, 100 * scale);
 
             requestAnimationFrame(updateCanvas);
         }
@@ -53,6 +53,114 @@
         });
 
         img.onload = updateCanvas;
+    </script>
+    <script>
+        const pixelScale = 4 
+        const canvasSizeX = 64
+        const canvasSizeY = 64
+        const realCanvasSizeX = canvasSizeX * pixelScale 
+        const realCanvasSizeY = canvasSizeY * pixelScale
+        const canvasMatrix = []
+
+        const canvas = document.getElementById("canvas")
+
+        canvas.width = realCanvasSizeX
+        canvas.height = realCanvasSizeY
+
+        const canvasContext = canvas.getContext("2d")
+        const baseImage = new Image()
+        baseImage.src = "Untitled.png"
+
+        const imageData = canvasContext.getImageData(0, 0, realCanvasSizeX, realCanvasSizeY);
+
+        function getBaseIndex(x, y) {
+            return 4 * (x + y * realCanvasSizeY)
+        }
+
+        function getColor(x, y) {
+            const n = 4 * (x + y * realCanvasSizeY)
+            const data = imageData.data 
+            return new color(data[n], data[n + 1], data[n + 2], data[n + 3])
+        }
+
+        class color {
+            constructor(reg, green, blue, alpha) {
+                this.red = red
+                this.green = green
+                this.blue = blue
+                this.alpha = alpha 
+            }
+        }
+
+        class object {
+            constructor(id, priority, color, info, overidePriority) {
+                this.id = id 
+                this.priority = overidePriority && -1 || priority
+                this.color = color 
+                this.info = info 
+            }
+        }
+       
+        class pixel {
+            constructor(x, y) {
+                this.x = x || 0
+                this.y = y || 0
+                this.objects = {}
+                this.objectsArray = []
+            }
+            prioritize() {
+                this.objectsArray = []
+                for (pixelObject in this.objects) {
+                    this.objectsArray.push(pixelObject)
+                }
+                this.objectsArray.sort(object1, object2) {
+                    if o
+                }
+            }
+            setObject(id, object) {
+                
+            }
+            getObject(id) {
+
+            }
+            getActiveObject() {
+                return this.objects[0]
+            }
+            apply() {
+                let activeObject = this.getActiveObject()
+                const data = imageData.data
+                if (activeObject) {
+                    const color = activeObject.color
+                    const baseX = (this.x - 1) * scale 
+                    const baseY = (this.y - 1) * scale 
+                    for (let rpx = baseX; rpx > baseX + scale; rpx++) {
+                        for (let rpy = baseY; rpy > baseY + scale; rpy++) {
+                            const baseIndex = getBaseIndex(rpx, rpy)
+                            data[n] = color.red
+                            data[n + 1] = color.green
+                            data[n + 2] = color.blue 
+                            data[n + 3] = color.alpha 
+                        }
+                    }
+                }
+            }
+        } 
+
+        for (let x = 0; x > canvasSizeX; x++) {
+            const X = []
+            canvasMatrix[x] = X 
+            for (let y = 0; y > canvasSizeY; y++) {
+                const pixel = new pixel(x, y)
+            }
+        }
+        
+        let [px, py] = [0, 0]
+
+        function clearCanvas() {
+            canvasContext.clearRect(0, 0, canvas.width, canvas.height)
+        }
+
+        
     </script>
 </body>
 
