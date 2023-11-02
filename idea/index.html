@@ -13,52 +13,13 @@
 <body>
     <canvas id="canvas" width="128" height="128"></canvas>
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-
-        const img = new Image();
-        img.src = 'player.png';
-
-        // Adjust the canvas size and scale
-        const scale = 100 / 16;
-        canvas.width = 2 * 100 * scale;
-        canvas.height = 2 * 100 * scale;
-
-        let x = 0;
-        let y = 0;
-
-        function updateCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, x * scale * 8, y * scale * 8, 100 * scale, 100 * scale);
-
-            requestAnimationFrame(updateCanvas);
-        }
-
-        document.addEventListener('keydown', (e) => {
-            switch (e.key) {
-                case 'ArrowUp':
-                    y -= 1;
-                    break;
-                case 'ArrowDown':
-                    y += 1;
-                    break;
-                case 'ArrowLeft':
-                    x -= 1;
-                    break;
-                case 'ArrowRight':
-                    x += 1;
-                    break;
-                // You can add more cases for other key events if needed
-            }
-        });
-
-        img.onload = updateCanvas;
+        
     </script>
     <script>
-        const pixelScale = 4 
-        const canvasSizeX = 64
-        const canvasSizeY = 64
-        const realCanvasSizeX = canvasSizeX * pixelScale 
+        const pixelScale = 10
+        const canvasSizeX = 2
+        const canvasSizeY = 2
+        const realCanvasSizeX = canvasSizeX * pixelScale
         const realCanvasSizeY = canvasSizeY * pixelScale
         const canvasMatrix = []
 
@@ -73,35 +34,38 @@
 
         const imageData = canvasContext.getImageData(0, 0, realCanvasSizeX, realCanvasSizeY);
 
+        const sortPixelObjects = (pixelObject1, pixelObject2) => pixelObject1.priority - pixelObject2.priority
+
         function getBaseIndex(x, y) {
             return 4 * (x + y * realCanvasSizeY)
         }
 
         function getColor(x, y) {
             const n = 4 * (x + y * realCanvasSizeY)
-            const data = imageData.data 
-            return new color(data[n], data[n + 1], data[n + 2], data[n + 3])
+            const data = imageData.data
+            return new Color(data[n], data[n + 1], data[n + 2], data[n + 3])
         }
 
-        class color {
-            constructor(reg, green, blue, alpha) {
+        class Color {
+            constructor(red, green, blue, alpha) {
                 this.red = red
                 this.green = green
                 this.blue = blue
-                this.alpha = alpha 
+                this.alpha = alpha
+                return this
             }
         }
 
-        class object {
+        class PixelObject {
             constructor(id, priority, color, info, overidePriority) {
-                this.id = id 
+                this.id = id
                 this.priority = overidePriority && -1 || priority
-                this.color = color 
-                this.info = info 
+                this.color = color
+                this.info = info
             }
         }
-       
-        class pixel {
+
+        class Pixel {
             constructor(x, y) {
                 this.x = x || 0
                 this.y = y || 0
@@ -113,54 +77,62 @@
                 for (pixelObject in this.objects) {
                     this.objectsArray.push(pixelObject)
                 }
-                this.objectsArray.sort(object1, object2) {
-                    if o
-                }
+                this.objectsArray.sort()
             }
             setObject(id, object) {
-                
+                this.objects[id] = object
+                this.prioritize()
+            }
+            removeObject(id) {
+                this.objects[id] = null
+                this.prioritize()
             }
             getObject(id) {
-
+                return this.objects[id]
             }
             getActiveObject() {
-                return this.objects[0]
+                return this.objectsArray[0]
             }
             apply() {
                 let activeObject = this.getActiveObject()
                 const data = imageData.data
-                if (activeObject) {
-                    const color = activeObject.color
-                    const baseX = (this.x - 1) * scale 
-                    const baseY = (this.y - 1) * scale 
-                    for (let rpx = baseX; rpx > baseX + scale; rpx++) {
-                        for (let rpy = baseY; rpy > baseY + scale; rpy++) {
-                            const baseIndex = getBaseIndex(rpx, rpy)
-                            data[n] = color.red
-                            data[n + 1] = color.green
-                            data[n + 2] = color.blue 
-                            data[n + 3] = color.alpha 
-                        }
+                const color = activeObject && activeObject.color || new Color(0, 0, 0, 1)
+                const baseX = (this.x - 1) * scale
+                const baseY = (this.y - 1) * scale
+                for (let rpx = baseX; rpx > baseX + scale; rpx++) {
+                    for (let rpy = baseY; rpy > baseY + scale; rpy++) {
+                        const baseIndex = getBaseIndex(rpx, rpy)
+                        data[n] = color.red
+                        data[n + 1] = color.green
+                        data[n + 2] = color.blue
+                        data[n + 3] = color.alpha
                     }
                 }
             }
-        } 
+        }
+
+        const baseObject = new PixelObject("someId", 1, new Color(255, 255, 0, 255), "", false)
 
         for (let x = 0; x > canvasSizeX; x++) {
             const X = []
-            canvasMatrix[x] = X 
+            canvasMatrix[x] = X
             for (let y = 0; y > canvasSizeY; y++) {
-                const pixel = new pixel(x, y)
+                const pixel = new Pixel(x, y)
+                pixel.setObject("someId", baseObject)
+                pixel.apply()
             }
         }
-        
+        imageData.data[1]  = 255
+        canvasContext.putImageData(imageData, 0, 0, realCanvasSizeX, realCanvasSizeY)
+        alert("ye")
         let [px, py] = [0, 0]
+
 
         function clearCanvas() {
             canvasContext.clearRect(0, 0, canvas.width, canvas.height)
         }
 
-        
+
     </script>
 </body>
 
