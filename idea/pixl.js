@@ -51,16 +51,19 @@ function PIXEL(x, y) {
 
 /**
  * 
+ * @param {compactColor} color 
+ * @param {number} x 
+ * @param {number} y 
+ * @param {Frame} frame 
+ * @param {Entity} origin 
  * @param {number} priority 
  * @param {compactPixel} pixel 
- * @param {{any}} origin 
- * @param {compactColor} initalColor 
+ * @param {State} state 
+ * @returns 
  */
-function PIXEL_OBJECT(priority, pixel, origin, initalColor) {
-    reutrn [priority, pixel, origin, initalColor]
+function OBJECT_PIXEL(color, x, y, frame, origin, priority, pixel, state) {
+    return [color, x, y, frame, priority, origin, pixel, state]
 }
-
-
 
 class Color {
     //Consider using getter/setters if applicable and won't interfere 
@@ -87,15 +90,23 @@ class Color {
 }
 
 class ObjectPixel {
+    get state() {
+        return this.base[7]
+    }
+
+    set state() {
+        throw new Error("can't set the state of an object pixel")
+    }
+
     get priority() {
-        return this.base[0]
+        return this.base[3]
     }
     set priority(priority) {
-        this.base["0"] = priority
+        this.base[3] = priority
     }
 
     get pixel() {
-        return this.base["1"]
+        return this.base[6]
     }
 
     /** 
@@ -106,19 +117,19 @@ class ObjectPixel {
         initalPixel.removeObject(this)
         newPixel.addObject(this)
 
-        this.base["0"] = newPixel.base
+        this.base[6] = newPixel.base
     }
 
     get origin() {
-        return this.base["2"]
+        return this.base[5]
     }
 
     set origin(newOrigin) {
-        this.base["2"] = newOrigin
+        this.base[5] = newOrigin
     }
 
     get color() {
-        return new Color(this.base["3"], this)
+        return new Color(this.base[0], this)
     }
 
     /**
@@ -183,16 +194,17 @@ class ImageAsset extends Asset {
      * 
      * @param {*} ID 
      * @param {*} source 
-     * @param {HTMLImageElement} image 
+     * @param {HTMLImageElement} image
+     * @param {integer} defaultPriority 
      */
-    constructor(ID, source, image) {
+    constructor(ID, source, image, defaultPriority, metaLayers) {
         super(ID, source)
         const imageData = __ALContext.getImageData(0, 0, image.width, image.height).data;
         for (let x = 0; ++x < image.width;) {
             for (let y = 0; ++y < image.height;) {
                 const n = (image.width * y + x) << 2;
                 const color = COLOR(imageData[n], imageData[n + 1], imageData[n + 2]);
-                this.pixels.push([x, y, color]);
+                this.pixels.push([x, y, color, defaultPriority]);
             }
         }
     }
@@ -244,10 +256,20 @@ class Frame {
     }
     base
     /**
-     * @param {ImageAsset} asset
+     * @param {ImageAsset} imageAsset
+     * @param {Entity} entity
      */
-    constructor(asset) {
-        this.base = asset 
+    constructor(imageAsset, entity, state) {
+        this.base = imageAsset 
+        this.objectPixels = []
+        for (pixelData in this.base.pixels) {
+            const x = pixelData[0];
+            const y = pixelData[1];
+            const color = pixelData[2];
+            const priority = pixelData[3];
+            const objPixel = OBJECT_PIXEL(color, x, y, this, entity, priority, _, state)
+            
+        }
     }
 }
 
@@ -276,10 +298,7 @@ class Entity {
    onCreate = emptyFunction
 }
 
-class player extends Entity {
-    
-}
 
 (async () => {
-    console.log(await loadImageAsset("https://cdn.math-rad.com/files/index/player.png"))
+    console.log(await loadImageAsset("https://cdn.math-rad.com/files/index/seamonster.png"))
 })()
