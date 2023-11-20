@@ -4,6 +4,7 @@ If you're reading this, you're cool :p
 */
 
 const colorsCache = new Map()
+const pointCache = new Map()
 const Hexify = (red, green, blue) => (red >> 16 | green >> 8 | blue).toString(16).padStart(6, '0')
 
 const __ALCanvas = document.createElement("canvas"); // Asset loading canvas
@@ -37,6 +38,19 @@ function COLOR(red, green, blue) {
     return color
 }
 
+function POINT(x, y) {
+    const key = `${x},${y}`
+
+    const cachedPoint = pointCache.get(key)
+
+    if (cachedPoint) {
+        return cachedPoint
+    }
+
+    const point = new Uint16Array([x, y])
+}
+
+
 
 /**
  * 
@@ -65,6 +79,7 @@ function OBJECT_PIXEL(color, x, y, frame, origin, priority, pixel, state) {
     return [color, x, y, frame, priority, origin, pixel, state]
 }
 
+
 class Color {
     //Consider using getter/setters if applicable and won't interfere 
     refresh() {
@@ -86,6 +101,17 @@ class Color {
 
         
         
+    }
+}
+
+class Point {
+    offset(x, y) {
+        return new Point(POINT(this.x + x, this.y + y))
+    }
+    constructor(base) {
+        this.base = base 
+        this.x = base[0]
+        this.y = base[1]
     }
 }
 
@@ -249,11 +275,18 @@ async function loadImageAsset(imagePath) {
     return await asset
 }
 
+
+/**
+ * @class Frame
+ * @property {Array[compactObjectPixel]} objectPixels
+ */
 class Frame {
     meta = {
         layers: [],
         colorTags: {}
     }
+    objectPixels = []
+
     base
     /**
      * @param {ImageAsset} imageAsset
@@ -262,13 +295,14 @@ class Frame {
     constructor(imageAsset, entity, state) {
         this.base = imageAsset 
         this.objectPixels = []
+
         for (pixelData in this.base.pixels) {
             const x = pixelData[0];
             const y = pixelData[1];
             const color = pixelData[2];
             const priority = pixelData[3];
             const objPixel = OBJECT_PIXEL(color, x, y, this, entity, priority, _, state)
-            
+            this.objectPixels.push(objPixel)
         }
     }
 }
@@ -282,12 +316,26 @@ class State {
      * @param {string} stateName 
      * @param {Array<Frame>} frames 
      */ 
-    constructor(stateName, frames) {
+    constructor(stateName, ...frames) {
         this.name = stateName
         this.frames = frames
     }
 }
 
+class Canvas {
+    resX = 0
+    resY = 0
+    pixelSize = 16
+    canvas = []
+    constructor(resX, resY, pixelSize) {
+        for (X = 0; ++X < resX;) {
+            this.canvas[X] = []
+            for (Y = 0; ++Y < resY;) {
+                this.canvas[X][Y] = new Pixel(PIXEL(X, Y))
+            }
+        } 
+    }
+}
 
 class Entity {
    init = emptyFunction
@@ -296,7 +344,47 @@ class Entity {
    beforeFrame = emptyFunction
    onFrame = emptyFunction
    onCreate = emptyFunction
+
+   states = []
+   tick = 0
+
+   __objectPixels = []
+   /**
+    * @returns {Frame}
+    */
+   __GETFRAME() {
+
+   }
+
+   __APPLYFRAME() {
+    const lastObjectPixels = this.__objectPixels
+    const newObjectPixels = []
+    const currentFrame = this.__GETFRAME()
+
+    for (pixelObject of currentFrame.objectPixels) {
+        
+    }
+   }
+
+   position = POINT(0, 0)
+   set position(position) {
+    this.position = position.base ||  position
+   }
+   get position() {
+    return  new Point(this.position)
+   }
+
+   /**
+    * 
+    * @param {Canvas} canvas 
+    */
+
+   constructor(canvas) {
+    this.canvas = canvas
+   }
 }
+
+
 
 
 (async () => {
