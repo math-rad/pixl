@@ -275,6 +275,21 @@ async function loadImageAsset(imagePath) {
     return await asset
 }
 
+class PositionedFrame {
+    x = 0
+    y = 0
+
+    get(x, y) {
+        
+    }
+
+    constructor(frame, x, y) {
+        this.x = x 
+        this.y = y
+        this.base = frame 
+    }
+}
+
 
 /**
  * @class Frame
@@ -287,6 +302,9 @@ class Frame {
     }
     objectPixels = []
 
+    calculate(x, y) {
+        
+    }
     base
     /**
      * @param {ImageAsset} imageAsset
@@ -361,7 +379,7 @@ class Entity {
     const newObjectPixels = []
     const currentFrame = this.__GETFRAME()
 
-    for (pixelObject of currentFrame.objectPixels) {
+    for (var objectPixel of lastObjectPixels) {
         
     }
    }
