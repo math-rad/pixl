@@ -278,15 +278,21 @@ async function loadImageAsset(imagePath) {
 class PositionedFrame {
     x = 0
     y = 0
-
-    get(x, y) {
-        
-    }
-
+    pixels = []
+    /**
+     * 
+     * @param {Frame} frame 
+     * @param {number} x 
+     * @param {number} y 
+     */
     constructor(frame, x, y) {
         this.x = x 
         this.y = y
         this.base = frame 
+        this.positionedPixels = []
+        for (objectPixel in this.base.objectPixels) {  
+            this.positionedPixels.push([x + objectPixel[1], y + objPixel[2], objectPixel])
+        }
     }
 }
 
@@ -303,7 +309,7 @@ class Frame {
     objectPixels = []
 
     calculate(x, y) {
-        
+        return new PositionedFrame(this, x, y)
     }
     base
     /**
@@ -368,6 +374,7 @@ class Entity {
 
    __objectPixels = []
    /**
+    * @function __GETFRAME
     * @returns {Frame}
     */
    __GETFRAME() {
@@ -378,6 +385,7 @@ class Entity {
     const lastObjectPixels = this.__objectPixels
     const newObjectPixels = []
     const currentFrame = this.__GETFRAME()
+    const calculatedCurrentFrame = currentFrame.calculate()
 
     for (var objectPixel of lastObjectPixels) {
         
